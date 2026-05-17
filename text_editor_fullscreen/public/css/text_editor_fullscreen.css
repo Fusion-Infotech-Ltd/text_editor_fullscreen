@@ -1,0 +1,233 @@
+.control-value.like-disabled-input.for-description {
+	position: relative;
+	min-height: 100px;
+}
+
+.control-value.like-disabled-input.for-description .ql-fullscreen-readonly,
+.ql-container.ql-snow .ql-fullscreen-readonly {
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	width: 36px;
+	height: 36px;
+	padding: 0;
+	border: none;
+	background: var(--fg-color);
+	cursor: pointer;
+	z-index: 10;
+	border-radius: var(--border-radius-md);
+	box-shadow: var(--shadow-md);
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 0.2s ease, visibility 0.2s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.control-value.like-disabled-input.for-description .ql-fullscreen-readonly .icon,
+.ql-container.ql-snow .ql-fullscreen-readonly .icon {
+	width: 18px;
+	height: 18px;
+	stroke: var(--icon-stroke);
+	fill: none;
+}
+
+.control-value.like-disabled-input.for-description .ql-fullscreen-readonly.visible,
+.ql-container.ql-snow .ql-fullscreen-readonly.visible {
+	opacity: 1;
+	visibility: visible;
+}
+
+.control-value.like-disabled-input.for-description .ql-fullscreen-readonly:hover,
+.ql-container.ql-snow .ql-fullscreen-readonly:hover {
+	background: var(--gray-200);
+}
+
+.control-value.like-disabled-input.for-description .ql-fullscreen-readonly:hover .icon,
+.ql-container.ql-snow .ql-fullscreen-readonly:hover .icon {
+	stroke: var(--text-color);
+}
+
+.ql-toolbar.ql-snow .ql-fullscreen {
+	position: absolute;
+	right: 4px;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 32px;
+	height: 32px;
+	padding: 0;
+	border: none;
+	background: transparent;
+	cursor: pointer;
+	z-index: 10;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.ql-toolbar.ql-snow .ql-fullscreen .icon {
+	width: 18px;
+	height: 18px;
+	stroke: var(--icon-stroke);
+	fill: none;
+}
+
+.ql-toolbar.ql-snow .ql-fullscreen:hover {
+	background: var(--gray-200);
+	border-radius: var(--border-radius-sm);
+}
+
+.ql-toolbar.ql-snow .ql-fullscreen:hover .icon {
+	stroke: var(--text-color);
+}
+
+.text-editor-fullscreen-modal {
+	z-index: 1055 !important;
+	background: rgba(0, 0, 0, 0.6);
+}
+
+.text-editor-fullscreen-modal .modal-dialog {
+	max-width: 90vw;
+	margin: 2rem auto;
+}
+
+.text-editor-fullscreen-modal .modal-content {
+	background: var(--fg-color);
+	color: var(--text-color);
+	border: 1px solid var(--border-color);
+}
+
+.text-editor-fullscreen-modal .modal-header {
+	background: var(--fg-color);
+	color: var(--text-color);
+	border-bottom: 1px solid var(--border-color);
+}
+
+.text-editor-fullscreen-modal .modal-title {
+	color: var(--text-color);
+}
+
+.text-editor-fullscreen-modal .modal-body {
+	background: var(--fg-color);
+	color: var(--text-color);
+}
+
+.text-editor-fullscreen-modal .btn-close {
+	width: 32px;
+	height: 32px;
+	padding: 0;
+	border: none;
+	background: var(--gray-100);
+	cursor: pointer;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: background 0.2s ease;
+	opacity: 1;
+}
+
+.text-editor-fullscreen-modal .btn-close .icon {
+	width: 16px;
+	height: 16px;
+	stroke: var(--text-color);
+	fill: none;
+}
+
+.text-editor-fullscreen-modal .btn-close:hover {
+	background: var(--gray-200);
+}
+
+.text-editor-fullscreen-modal .ql-container {
+	background: var(--fg-color) !important;
+	color: var(--text-color) !important;
+	border-color: var(--border-color) !important;
+}
+
+.text-editor-fullscreen-modal .ql-editor {
+	background: var(--fg-color) !important;
+	color: var(--text-color) !important;
+}
+
+.text-editor-fullscreen-modal .ql-editor.read-mode {
+	background: var(--fg-color) !important;
+	color: var(--text-color) !important;
+}
+
+.text-editor-fullscreen-modal .ql-toolbar {
+	background: var(--fg-color) !important;
+	border-color: var(--border-color) !important;
+}
+
+.text-editor-fullscreen-modal .ql-toolbar .ql-stroke {
+	stroke: var(--icon-stroke) !important;
+}
+
+.text-editor-fullscreen-modal .ql-toolbar .ql-fill {
+	fill: var(--icon-stroke) !important;
+}
+
+.text-editor-fullscreen-modal .ql-toolbar button:hover .ql-stroke {
+	stroke: var(--text-color) !important;
+}
+
+.text-editor-fullscreen-modal .ql-toolbar button:hover .ql-fill {
+	fill: var(--text-color) !important;
+}
+
+.text-editor-fullscreen-modal .ql-editor p,
+.text-editor-fullscreen-modal .ql-editor h1,
+.text-editor-fullscreen-modal .ql-editor h2,
+.text-editor-fullscreen-modal .ql-editor h3,
+.text-editor-fullscreen-modal .ql-editor h4,
+.text-editor-fullscreen-modal .ql-editor h5,
+.text-editor-fullscreen-modal .ql-editor h6,
+.text-editor-fullscreen-modal .ql-editor ul,
+.text-editor-fullscreen-modal .ql-editor ol,
+.text-editor-fullscreen-modal .ql-editor li,
+.text-editor-fullscreen-modal .ql-editor span,
+.text-editor-fullscreen-modal .ql-editor div {
+	color: var(--text-color) !important;
+}
+
+[data-theme="dark"] .control-value.like-disabled-input.for-description .ql-fullscreen-readonly,
+[data-theme="dark"] .ql-container.ql-snow .ql-fullscreen-readonly {
+	background: var(--gray-800);
+}
+
+[data-theme="dark"] .control-value.like-disabled-input.for-description .ql-fullscreen-readonly:hover,
+[data-theme="dark"] .ql-container.ql-snow .ql-fullscreen-readonly:hover {
+	background: var(--gray-700);
+}
+
+[data-theme="dark"] .ql-toolbar.ql-snow .ql-fullscreen:hover {
+	background: var(--gray-800);
+}
+
+[data-theme="dark"] .text-editor-fullscreen-modal .btn-close {
+	background: var(--gray-800);
+}
+
+[data-theme="dark"] .text-editor-fullscreen-modal .btn-close:hover {
+	background: var(--gray-700);
+}
+
+[data-theme="dark"] .text-editor-fullscreen-modal .ql-container {
+	background: var(--gray-900) !important;
+}
+
+[data-theme="dark"] .text-editor-fullscreen-modal .ql-editor {
+	background: var(--gray-900) !important;
+	color: var(--gray-50) !important;
+}
+
+[data-theme="dark"] .text-editor-fullscreen-modal .ql-editor.read-mode {
+	background: var(--gray-900) !important;
+	color: var(--gray-50) !important;
+}
+
+[data-theme="dark"] .text-editor-fullscreen-modal .ql-toolbar {
+	background: var(--gray-900) !important;
+	border-color: var(--gray-800) !important;
+}
