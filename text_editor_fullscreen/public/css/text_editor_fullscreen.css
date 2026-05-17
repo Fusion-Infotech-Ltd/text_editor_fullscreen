@@ -46,7 +46,8 @@
 
 .control-value.like-disabled-input.for-description .ql-fullscreen-readonly:hover .icon,
 .ql-container.ql-snow .ql-fullscreen-readonly:hover .icon {
-	stroke: var(--text-color);
+	transform: scale(1.25);
+	transition: transform 0.25s ease;
 }
 
 .ql-toolbar.ql-snow .ql-fullscreen {
@@ -79,7 +80,8 @@
 }
 
 .ql-toolbar.ql-snow .ql-fullscreen:hover .icon {
-	stroke: var(--text-color);
+	transform: scale(1.25);
+	transition: transform 0.25s ease;
 }
 
 .text-editor-fullscreen-modal {
@@ -136,7 +138,8 @@
 }
 
 .text-editor-fullscreen-modal .btn-close:hover {
-	background: var(--gray-200);
+	transform: scale(1.25);
+	transition: transform 0.25s ease;
 }
 
 .text-editor-fullscreen-modal .ql-container {
