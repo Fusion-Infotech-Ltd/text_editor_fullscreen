@@ -79,14 +79,49 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 		});
 	}
 
+	remove_editable_fullscreen_button() {
+		const $toolbar = this.$wrapper.find(".ql-toolbar");
+		$toolbar.find(".ql-formats-fullscreen").remove();
+		$toolbar.children(".ql-fullscreen").remove();
+		$toolbar.removeClass("tefs-has-fullscreen").css({
+			position: "",
+			"padding-right": "",
+		});
+	}
+
+	add_editable_fullscreen_button() {
+		const $toolbar = this.$wrapper.find(".ql-toolbar");
+		if (!$toolbar.length) return;
+
+		this.remove_editable_fullscreen_button();
+
+		const $fullscreen_btn = $(`
+			<button class="ql-fullscreen" type="button" title="${__('Fullscreen')}">
+				<svg class="icon icon-sm">
+					<use href="#icon-expand"></use>
+				</svg>
+			</button>
+		`);
+
+		$fullscreen_btn.on("click", (e) => {
+			e.preventDefault();
+			e.stopPropagation();
+			this.toggle_fullscreen();
+		});
+
+		const $formats = $('<span class="ql-formats ql-formats-fullscreen"></span>');
+		$formats.append($fullscreen_btn);
+		$toolbar.addClass("tefs-has-fullscreen").append($formats);
+	}
+
 	add_fullscreen_button() {
-		// Remove existing buttons first
-		this.$wrapper.find(".ql-fullscreen, .ql-fullscreen-readonly").remove();
-		
+		this.$wrapper.find(".ql-fullscreen-readonly").remove();
+		this.remove_editable_fullscreen_button();
+
 		if (!this.quill) return;
-		
+
 		const is_read_only = this.df.read_only || !this.quill.isEnabled();
-		
+
 		if (is_read_only) {
 			const $container = this.$wrapper.find(".ql-container");
 			if (!$container.length) return;
@@ -128,31 +163,7 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 				showButton();
 			});
 		} else {
-			// For editable fields
-			const $toolbar = this.$wrapper.find(".ql-toolbar");
-			if (!$toolbar.length) return;
-			
-			// Make sure toolbar has relative positioning
-			$toolbar.css({
-				"position": "relative",
-				"padding-right": "40px"
-			});
-			
-			const $fullscreen_btn = $(`
-				<button class="ql-fullscreen" type="button" title="${__('Fullscreen')}">
-					<svg class="icon icon-sm">
-						<use href="#icon-expand"></use>
-					</svg>
-				</button>
-			`);
-			
-			$fullscreen_btn.on("click", (e) => {
-				e.preventDefault();
-				e.stopPropagation();
-				this.toggle_fullscreen();
-			});
-			
-			$toolbar.append($fullscreen_btn);
+			this.add_editable_fullscreen_button();
 		}
 	}
 

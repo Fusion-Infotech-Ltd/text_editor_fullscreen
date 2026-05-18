@@ -50,36 +50,87 @@
 	transition: transform 0.25s ease;
 }
 
-.ql-toolbar.ql-snow .ql-fullscreen {
+/* Pin fullscreen to the first toolbar row (v16 adds extra row height via .ql-formats margin) */
+.ql-toolbar.ql-snow.tefs-has-fullscreen,
+.ql-toolbar.ql-snow:has(> .ql-fullscreen),
+.ql-toolbar.ql-snow:has(.ql-formats-fullscreen) {
+	position: relative;
+	padding-right: 36px;
+}
+
+[dir="rtl"] .ql-toolbar.ql-snow.tefs-has-fullscreen,
+[dir="rtl"] .ql-toolbar.ql-snow:has(> .ql-fullscreen),
+[dir="rtl"] .ql-toolbar.ql-snow:has(.ql-formats-fullscreen) {
+	padding-right: 0;
+	padding-left: 36px;
+}
+
+.ql-toolbar.ql-snow .ql-formats.ql-formats-fullscreen {
 	position: absolute;
+	top: 4px;
 	right: 4px;
-	top: 50%;
-	transform: translateY(-50%);
-	width: 32px;
-	height: 32px;
-	padding: 0;
+	float: none;
+	margin: 0;
+	z-index: 1;
+}
+
+[dir="rtl"] .ql-toolbar.ql-snow .ql-formats.ql-formats-fullscreen {
+	right: auto;
+	left: 4px;
+}
+
+/* Legacy: button injected directly on toolbar (old cached assets) */
+.ql-toolbar.ql-snow > .ql-fullscreen,
+.ql-toolbar.ql-snow.tefs-has-fullscreen > .ql-fullscreen,
+.ql-toolbar.ql-snow .ql-formats.ql-formats-fullscreen .ql-fullscreen {
+	position: static;
+	float: none;
+	transform: none;
+	width: 28px;
+	height: 24px;
+	padding: 3px 5px;
 	border: none;
 	background: transparent;
 	cursor: pointer;
-	z-index: 10;
-	display: flex;
+	box-sizing: border-box;
+	display: inline-flex;
 	align-items: center;
 	justify-content: center;
+	line-height: 0;
 }
 
-.ql-toolbar.ql-snow .ql-fullscreen .icon {
-	width: 18px;
-	height: 18px;
+.ql-toolbar.ql-snow > .ql-fullscreen,
+.ql-toolbar.ql-snow.tefs-has-fullscreen > .ql-fullscreen {
+	position: absolute;
+	top: 4px;
+	right: 4px;
+}
+
+[dir="rtl"] .ql-toolbar.ql-snow > .ql-fullscreen,
+[dir="rtl"] .ql-toolbar.ql-snow.tefs-has-fullscreen > .ql-fullscreen {
+	right: auto;
+	left: 4px;
+}
+
+.ql-toolbar.ql-snow > .ql-fullscreen .icon,
+.ql-toolbar.ql-snow.tefs-has-fullscreen > .ql-fullscreen .icon,
+.ql-toolbar.ql-snow .ql-formats.ql-formats-fullscreen .ql-fullscreen .icon {
+	width: 16px;
+	height: 16px;
 	stroke: var(--icon-stroke);
 	fill: none;
 }
 
-.ql-toolbar.ql-snow .ql-fullscreen:hover {
+.ql-toolbar.ql-snow > .ql-fullscreen:hover,
+.ql-toolbar.ql-snow.tefs-has-fullscreen > .ql-fullscreen:hover,
+.ql-toolbar.ql-snow .ql-formats.ql-formats-fullscreen .ql-fullscreen:hover {
 	background: var(--gray-200);
 	border-radius: var(--border-radius-sm);
 }
 
-.ql-toolbar.ql-snow .ql-fullscreen:hover .icon {
+.ql-toolbar.ql-snow > .ql-fullscreen:hover .icon,
+.ql-toolbar.ql-snow.tefs-has-fullscreen > .ql-fullscreen:hover .icon,
+.ql-toolbar.ql-snow .ql-formats.ql-formats-fullscreen .ql-fullscreen:hover .icon {
 	transform: scale(1.25);
 	transition: transform 0.25s ease;
 }
@@ -218,7 +269,9 @@
 	background: var(--gray-700);
 }
 
-[data-theme="dark"] .ql-toolbar.ql-snow .ql-fullscreen:hover {
+[data-theme="dark"] .ql-toolbar.ql-snow > .ql-fullscreen:hover,
+[data-theme="dark"] .ql-toolbar.ql-snow.tefs-has-fullscreen > .ql-fullscreen:hover,
+[data-theme="dark"] .ql-toolbar.ql-snow .ql-formats.ql-formats-fullscreen .ql-fullscreen:hover {
 	background: var(--gray-800);
 }
 
