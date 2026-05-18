@@ -90,8 +90,20 @@
 }
 
 .text-editor-fullscreen-modal .modal-dialog {
-	max-width: 90vw;
 	margin: 2rem auto;
+	max-width: 1090px;
+	width: auto;
+}
+
+@media (min-width: 1200px) {
+	.text-editor-fullscreen-modal .modal-dialog {
+		max-width: 1290px;
+	}
+}
+
+.text-editor-fullscreen-modal.tefs-app-full-width .modal-dialog {
+	max-width: 90%;
+	width: 90%;
 }
 
 .text-editor-fullscreen-modal .modal-content {
@@ -104,6 +116,7 @@
 	background: var(--fg-color);
 	color: var(--text-color);
 	border-bottom: 1px solid var(--border-color);
+	padding: 0.5rem 1rem;
 }
 
 .text-editor-fullscreen-modal .modal-title {
@@ -156,6 +169,7 @@
 .text-editor-fullscreen-modal .ql-editor.read-mode {
 	background: var(--fg-color) !important;
 	color: var(--text-color) !important;
+	padding: 1rem;
 }
 
 .text-editor-fullscreen-modal .ql-toolbar {

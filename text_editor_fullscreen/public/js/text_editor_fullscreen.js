@@ -168,15 +168,36 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 		}
 	}
 
+	is_app_full_width() {
+		return document.body.classList.contains("full-width");
+	}
+
+	apply_fullscreen_modal_width($modal) {
+		$modal.toggleClass("tefs-app-full-width", this.is_app_full_width());
+	}
+
+	bind_fullscreen_width_toggle($modal) {
+		$(document.body).on("toggleFullWidth.tefs-fullscreen", () => {
+			this.apply_fullscreen_modal_width($modal);
+		});
+	}
+
+	unbind_fullscreen_width_toggle() {
+		$(document.body).off("toggleFullWidth.tefs-fullscreen");
+	}
+
+	destroy_fullscreen_modal() {
+		this.unbind_fullscreen_width_toggle();
+		this.$fullscreen_modal?.remove();
+		this.$fullscreen_modal = null;
+	}
+
 	show_fullscreen_readonly() {
 		if (!this.value) return;
-		
-		const is_full_width = $("body").hasClass("full-width");
-		const modal_class = is_full_width ? "modal-full-width" : "modal-xl";
-		
+
 		this.$fullscreen_modal = $(`
 			<div class="modal fade show text-editor-fullscreen-modal" style="display: block;">
-				<div class="modal-dialog ${modal_class}">
+				<div class="modal-dialog modal-lg">
 					<div class="modal-content">
 						<div class="modal-header">
 							<h5 class="modal-title">${this.df.label || __('Document Content')}</h5>
@@ -197,23 +218,26 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 				</div>
 			</div>
 		`).appendTo(document.body);
-		
-		this.$fullscreen_modal.find(".btn-close").click(() => {
-			this.$fullscreen_modal.remove();
+
+		this.apply_fullscreen_modal_width(this.$fullscreen_modal);
+		this.bind_fullscreen_width_toggle(this.$fullscreen_modal);
+
+		const close_readonly_modal = () => {
+			this.destroy_fullscreen_modal();
 			$(document).off("keydown.fullscreen-readonly");
-		});
-		
+		};
+
+		this.$fullscreen_modal.find(".btn-close").click(close_readonly_modal);
+
 		this.$fullscreen_modal.click((e) => {
 			if ($(e.target).hasClass("text-editor-fullscreen-modal")) {
-				this.$fullscreen_modal.remove();
-				$(document).off("keydown.fullscreen-readonly");
+				close_readonly_modal();
 			}
 		});
-		
+
 		$(document).on("keydown.fullscreen-readonly", (e) => {
 			if (e.key === "Escape") {
-				this.$fullscreen_modal.remove();
-				$(document).off("keydown.fullscreen-readonly");
+				close_readonly_modal();
 			}
 		});
 	}
@@ -226,12 +250,9 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 		this.original_height = this.quill_container.find(".ql-editor").css("height");
 		const is_read_only = this.df.read_only || !this.quill.isEnabled();
 
-		const is_full_width = $("body").hasClass("full-width");
-		const modal_class = is_full_width ? "modal-full-width" : "modal-xl";
-		
 		this.$fullscreen_modal = $(`
 			<div class="modal fade show text-editor-fullscreen-modal" style="display: block;">
-				<div class="modal-dialog ${modal_class}">
+				<div class="modal-dialog modal-lg">
 					<div class="modal-content">
 						<div class="modal-header">
 							<h5 class="modal-title">${this.df.label || __('Document Content')}</h5>
@@ -246,7 +267,10 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 				</div>
 			</div>
 		`).appendTo(document.body);
-		
+
+		this.apply_fullscreen_modal_width(this.$fullscreen_modal);
+		this.bind_fullscreen_width_toggle(this.$fullscreen_modal);
+
 		const $modal_body = this.$fullscreen_modal.find(".modal-body");
 		if (this.$toolbar?.length) {
 			$modal_body.append(this.$toolbar);
@@ -302,7 +326,7 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 			$fs_btn.find("use").attr("href", "#icon-expand");
 		}
 
-		this.$fullscreen_modal?.remove();
+		this.destroy_fullscreen_modal();
 		$(document).off("keydown.fullscreen-editor");
 
 		this.$toolbar = null;
