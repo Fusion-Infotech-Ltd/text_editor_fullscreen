@@ -16,31 +16,79 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 
 	make() {
 		super.make();
-		
-		// Add fullscreen button after quill is initialized
-		if (this.quill) {
-			setTimeout(() => {
-				this.add_fullscreen_button();
-			}, 100);
-		}
+		this.ensure_form_tab_listener();
+		this.schedule_fullscreen_button_setup();
+	}
+
+	refresh_input() {
+		super.refresh_input();
+		this.schedule_fullscreen_button_setup();
+	}
+
+	set_disp_area(value) {
+		super.set_disp_area(value);
+		this.schedule_fullscreen_button_setup();
 	}
 
 	set_formatted_input(value) {
 		super.set_formatted_input(value);
-		
-		// Re-add fullscreen button after value changes
-		setTimeout(() => {
-			this.add_fullscreen_button();
+		this.schedule_fullscreen_button_setup();
+	}
+
+	schedule_fullscreen_button_setup() {
+		clearTimeout(this._tefs_btn_timer);
+		this._tefs_btn_timer = setTimeout(() => this.refresh_fullscreen_ui(), 100);
+	}
+
+	ensure_form_tab_listener() {
+		if (!this.frm || this.frm._tefs_tab_listener_bound) return;
+		this.frm._tefs_tab_listener_bound = true;
+
+		this.frm.$wrapper.on("shown.bs.tab.tefs", '[data-toggle="tab"]', () => {
+			setTimeout(() => this.refresh_visible_tab_text_editors(), 50);
+		});
+	}
+
+	refresh_visible_tab_text_editors() {
+		if (!this.frm?.$wrapper) return;
+
+		this.frm.$wrapper
+			.find('.tab-pane.active .frappe-control[data-fieldtype="Text Editor"]')
+			.each((_, el) => {
+				el.fieldobj?.schedule_fullscreen_button_setup?.();
+			});
+	}
+
+	uses_disp_area() {
+		const $disp_area = this.$wrapper.find(".control-value.like-disabled-input");
+		return $disp_area.length && $disp_area.is(":visible");
+	}
+
+	refresh_fullscreen_ui() {
+		if (this.is_fullscreen) return;
+
+		if (this.uses_disp_area()) {
+			this.remove_editable_fullscreen_button();
+			this.$wrapper.find(".ql-container .ql-fullscreen-readonly").remove();
 			this.add_fullscreen_button_to_disp_area();
-		}, 100);
+			return;
+		}
+
+		if (this.quill) {
+			this.add_fullscreen_button();
+		}
 	}
 
 	add_fullscreen_button_to_disp_area() {
 		const $disp_area = this.$wrapper.find(".control-value.like-disabled-input");
-		if (!$disp_area.length || $disp_area.find(".ql-fullscreen-readonly").length) return;
-		
-		if (!this.value || this.value.trim() === "") return;
-		
+		if (!$disp_area.length) return;
+
+		$disp_area.find(".ql-fullscreen-readonly").remove();
+		$disp_area.off(".tefs");
+
+		const value = this.value || $disp_area.text() || "";
+		if (!String(value).trim()) return;
+
 		const $fullscreen_btn = $(`
 			<button class="ql-fullscreen-readonly" type="button" title="${__('View Fullscreen')}">
 				<svg class="icon icon-sm">
@@ -48,32 +96,32 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 				</svg>
 			</button>
 		`);
-		
+
 		$fullscreen_btn.on("click", (e) => {
 			e.preventDefault();
 			e.stopPropagation();
 			this.show_fullscreen_readonly();
 		});
-		
+
 		$disp_area.css("position", "relative").append($fullscreen_btn);
-		
+
 		let mouseMoveTimeout = null;
 		const showButton = () => $fullscreen_btn.addClass("visible");
 		const hideButton = () => $fullscreen_btn.removeClass("visible");
-		
-		$disp_area.on("mousemove", () => {
+
+		$disp_area.on("mousemove.tefs", () => {
 			if (mouseMoveTimeout) clearTimeout(mouseMoveTimeout);
 			showButton();
 			mouseMoveTimeout = setTimeout(hideButton, 2000);
 		});
-		
-		$disp_area.on("mouseenter", showButton);
-		$disp_area.on("mouseleave", () => {
+
+		$disp_area.on("mouseenter.tefs", showButton);
+		$disp_area.on("mouseleave.tefs", () => {
 			if (mouseMoveTimeout) clearTimeout(mouseMoveTimeout);
 			hideButton();
 		});
-		
-		$fullscreen_btn.on("mouseenter", () => {
+
+		$fullscreen_btn.on("mouseenter.tefs", () => {
 			if (mouseMoveTimeout) clearTimeout(mouseMoveTimeout);
 			showButton();
 		});
@@ -115,6 +163,11 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 	}
 
 	add_fullscreen_button() {
+		if (this.uses_disp_area()) {
+			this.add_fullscreen_button_to_disp_area();
+			return;
+		}
+
 		this.$wrapper.find(".ql-fullscreen-readonly").remove();
 		this.remove_editable_fullscreen_button();
 
@@ -343,5 +396,7 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 		this.$toolbar = null;
 		this.original_parent = null;
 		this.original_height = null;
+
+		this.schedule_fullscreen_button_setup();
 	}
 };
