@@ -1,41 +1,45 @@
-### Text Editor Fullscreen
+## Text Editor Fullscreen v1.0.0
+<img width="1189" height="595" alt="image" src="https://github.com/user-attachments/assets/2b256346-2ea5-4173-8386-8c056580b8ff" />
+<img width="1228" height="604" alt="image" src="https://github.com/user-attachments/assets/9b21d4d2-b153-4cee-908c-0be6cda8875c" />
+<img width="1539" height="954" alt="image" src="https://github.com/user-attachments/assets/8b1f7507-afef-494f-82b0-141cb15ab07c" />
+<img width="1539" height="954" alt="image" src="https://github.com/user-attachments/assets/ebce6da0-a0ea-40f9-ba8d-8141bd1af2e5" />
 
-Adds fullscreen functionality to Frappe text editors (Quill Editor)
 
-### Installation
+First stable release of **Text Editor Fullscreen** — a lightweight Frappe app that adds a fullscreen mode to all **Text Editor** (Quill) fields on the desk.
 
-You can install this app using the [bench](https://github.com/frappe/bench) CLI:
+No configuration required. Install the app and every Text Editor field gets a fullscreen control automatically.
+
+---
+
+## Features
+
+### Fullscreen editing
+- Expand/collapse button on the Quill toolbar (editable fields)
+- Moves the editor and toolbar into a focused modal for long-form writing
+- **Escape** or click outside to exit
+- Toolbar icon switches between expand / collapse
+
+### Read-only & display mode
+- Fullscreen button on read-only editors and formatted display areas
+- View long HTML content comfortably without editing
+
+### ERPNext layout integration
+- Modal width respects the desk **Toggle Full Width** setting
+- **Full width off:** modal matches standard desk container width (not ~90% of the screen)
+- **Full width on:** modal uses 90% width, aligned with Frappe’s full-width layout
+- Resizes live if you toggle full width while the modal is open
+
+### Desk UX
+- Dark theme support
+- Styled to match Frappe CSS variables (`--fg-color`, `--border-color`, etc.)
+- Hover-reveal fullscreen button on read-only areas
+
+---
+
+## Installation
 
 ```bash
 cd $PATH_TO_YOUR_BENCH
-bench get-app $URL_OF_THIS_REPO --branch develop
+bench get-app https://github.com/raisulislam0/text_editor_fullscreen --branch main
 bench install-app text_editor_fullscreen
-```
-
-### Contributing
-
-This app uses `pre-commit` for code formatting and linting. Please [install pre-commit](https://pre-commit.com/#installation) and enable it for this repository:
-
-```bash
-cd apps/text_editor_fullscreen
-pre-commit install
-```
-
-Pre-commit is configured to use the following tools for checking and formatting your code:
-
-- ruff
-- eslint
-- prettier
-- pyupgrade
-
-### CI
-
-This app can use GitHub Actions for CI. The following workflows are configured:
-
-- CI: Installs this app and runs unit tests on every push to `develop` branch.
-- Linters: Runs [Frappe Semgrep Rules](https://github.com/frappe/semgrep-rules) and [pip-audit](https://pypi.org/project/pip-audit/) on every pull request.
-
-
-### License
-
-mit
+bench build --app text_editor_fullscreen
