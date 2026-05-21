@@ -227,7 +227,7 @@
 }
 
 .text-editor-fullscreen-modal .ql-editor.read-mode {
-	background: var(--fg-color) !important;
+	background: #f3f3f3 !important;
 	color: var(--text-color) !important;
 	padding: 0 1rem;
 }
