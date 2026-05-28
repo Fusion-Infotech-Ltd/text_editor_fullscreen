@@ -1,3 +1,7 @@
+// Author: Raisul Islam (raisul.aust1@gmail.com)
+// Date May 2026
+// Description: Adds fullscreen capability to Text Editor fields in Frappe/ERPNext.
+
 frappe.provide("frappe.ui.form.ControlTextEditor");
 
 // Store original class
@@ -23,6 +27,16 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 	refresh_input() {
 		super.refresh_input();
 		this.schedule_fullscreen_button_setup();
+	}
+
+	is_child_table_field() {
+		// Frappe's explicit flag (strict check to avoid truthy surprises)
+		if (this.in_grid === true) return true;
+
+		// DOM-based check: is this control physically inside a grid row?
+		if (this.$wrapper?.closest('.grid-body, .grid-row-open').length) return true;
+
+		return false;
 	}
 
 	set_disp_area(value) {
@@ -60,11 +74,17 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 	}
 
 	uses_disp_area() {
+		if (this.is_child_table_field()) return;
+		
 		const $disp_area = this.$wrapper.find(".control-value.like-disabled-input");
-		return $disp_area.length && $disp_area.is(":visible");
+		return $disp_area.length > 0 
+            && !$disp_area.hasClass("hide") 
+            && $disp_area.css("display") !== "none";
 	}
 
 	refresh_fullscreen_ui() {
+		if (this.is_child_table_field()) return;
+
 		if (this.is_fullscreen) return;
 
 		if (this.uses_disp_area()) {
@@ -80,14 +100,16 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 	}
 
 	add_fullscreen_button_to_disp_area() {
+		if (this.is_child_table_field()) return;
+
 		const $disp_area = this.$wrapper.find(".control-value.like-disabled-input");
 		if (!$disp_area.length) return;
 
 		$disp_area.find(".ql-fullscreen-readonly").remove();
 		$disp_area.off(".tefs");
 
-		const value = this.value || $disp_area.text() || "";
-		if (!String(value).trim()) return;
+		// const value = this.value || $disp_area.text() || "";
+		// if (!String(value).trim()) return;
 
 		const $fullscreen_btn = $(`
 			<button class="ql-fullscreen-readonly" type="button" title="${__('View Fullscreen')}">
@@ -138,6 +160,7 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 	}
 
 	add_editable_fullscreen_button() {
+		if (this.is_child_table_field()) return;
 		const $toolbar = this.$wrapper.find(".ql-toolbar");
 		if (!$toolbar.length) return;
 
@@ -163,6 +186,8 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 	}
 
 	add_fullscreen_button() {
+		if (this.is_child_table_field()) return;
+
 		if (this.uses_disp_area()) {
 			this.add_fullscreen_button_to_disp_area();
 			return;
@@ -171,14 +196,25 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 		this.$wrapper.find(".ql-fullscreen-readonly").remove();
 		this.remove_editable_fullscreen_button();
 
-		if (!this.quill) return;
+		if (!this.quill) {
+			const observer = new MutationObserver(() => {
+				if (this.$wrapper.find(".ql-container").length) {
+					observer.disconnect();
+					this.add_fullscreen_button();
+				}
+			});
+			observer.observe(this.$wrapper[0], { childList: true, subtree: true });
+			return;
+		}
 
 		const is_read_only = this.df.read_only || !this.quill.isEnabled();
 
 		if (is_read_only) {
 			const $container = this.$wrapper.find(".ql-container");
 			if (!$container.length) return;
-			
+
+			$container.off(".tefs"); 
+
 			const $fullscreen_btn = $(`
 				<button class="ql-fullscreen-readonly" type="button" title="${__('Fullscreen')}">
 					<svg class="icon icon-sm">
@@ -186,35 +222,36 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 					</svg>
 				</button>
 			`);
-			
+
 			$fullscreen_btn.on("click", (e) => {
 				e.preventDefault();
 				e.stopPropagation();
 				this.toggle_fullscreen();
 			});
-			
+
 			$container.css("position", "relative").append($fullscreen_btn);
-			
+
 			let mouseMoveTimeout = null;
 			const showButton = () => $fullscreen_btn.addClass("visible");
 			const hideButton = () => $fullscreen_btn.removeClass("visible");
-			
-			$container.on("mousemove", () => {
+
+			$container.on("mousemove.tefs", () => {
 				if (mouseMoveTimeout) clearTimeout(mouseMoveTimeout);
 				showButton();
 				mouseMoveTimeout = setTimeout(hideButton, 2000);
 			});
-			
-			$container.on("mouseenter", showButton);
-			$container.on("mouseleave", () => {
+
+			$container.on("mouseenter.tefs", showButton);
+			$container.on("mouseleave.tefs", () => {
 				if (mouseMoveTimeout) clearTimeout(mouseMoveTimeout);
 				hideButton();
 			});
-			
-			$fullscreen_btn.on("mouseenter", () => {
+
+			$fullscreen_btn.on("mouseenter.tefs", () => {
 				if (mouseMoveTimeout) clearTimeout(mouseMoveTimeout);
 				showButton();
 			});
+
 		} else {
 			this.add_editable_fullscreen_button();
 		}
@@ -257,6 +294,10 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 	}
 
 	show_fullscreen_readonly() {
+		if (this.df.parent && this.frm?.fields_dict[this.df.parent]?.grid) {
+			return;
+		}
+
 		if (!this.value) return;
 
 		this.$fullscreen_modal = $(`
@@ -307,8 +348,13 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 	}
 
 	enter_fullscreen() {
+		if (this.df.parent && this.frm?.fields_dict[this.df.parent]?.grid) {
+			return;
+		}
 		this.is_fullscreen = true;
-		
+		// Restore lock preference from previous session
+		this._is_fullscreen_locked = localStorage.getItem("tefs_fullscreen_locked") === "1";
+
 		this.$toolbar = this.get_quill_toolbar();
 		this.original_parent = this.quill_container.parent();
 		this.original_height = this.quill_container.find(".ql-editor").css("height");
@@ -320,6 +366,11 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 					<div class="modal-content">
 						<div class="modal-header">
 							<h5 class="modal-title">${this.df.label || __('Document Content')}</h5>
+							<button type="button" class="btn-lock-toggle" title="${__('Lock (prevent accidental close)')}" style="background: transparent; border: none;">
+								<svg class="icon icon-sm">
+									<use href="#icon-unlock"></use>
+								</svg>
+							</button>
 							<button type="button" class="btn-close">
 								<svg class="icon icon-sm">
 									<use href="#icon-close"></use>
@@ -358,21 +409,86 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 				$fs_btn.find("use").attr("href", "#icon-collapse");
 			}
 		}
-		
-		this.$fullscreen_modal.find(".btn-close").click(() => this.exit_fullscreen());
-		this.$fullscreen_modal.click((e) => {
-			if ($(e.target).hasClass("text-editor-fullscreen-modal")) {
+
+		// ── Close button: always exits regardless of lock state ──────────────
+		this.$fullscreen_modal.find(".btn-close").on("click.tefs", () => this.exit_fullscreen());
+
+		// ── Lock / unlock toggle ─────────────────────────────────────────────
+		const $lock_btn = this.$fullscreen_modal.find(".btn-lock-toggle");
+
+		// Apply the restored lock state to the UI immediately
+		if (this._is_fullscreen_locked) {
+			$lock_btn.find("use").attr("href", "#icon-lock");
+			$lock_btn.attr("title", __("Unlock (allow close on outside click / Escape)"));
+			this.$fullscreen_modal.addClass("tefs-locked");
+		}
+
+		$lock_btn.on("click.tefs", () => {
+			this._is_fullscreen_locked = !this._is_fullscreen_locked;
+
+			if (this._is_fullscreen_locked) {
+				$lock_btn.find("use").attr("href", "#icon-lock");
+				$lock_btn.attr("title", __("Unlock (allow close on outside click / Escape)"));
+				this.$fullscreen_modal.addClass("tefs-locked");
+				localStorage.setItem("tefs_fullscreen_locked", "1");
+			} else {
+				$lock_btn.find("use").attr("href", "#icon-unlock");
+				$lock_btn.attr("title", __("Lock (prevent accidental close)"));
+				this.$fullscreen_modal.removeClass("tefs-locked");
+				localStorage.setItem("tefs_fullscreen_locked", "0");
+			}
+		});
+
+		// ── Click outside the modal-dialog ───────────────────────────────────
+		// Exits when unlocked; nudges when locked.
+		this.$fullscreen_modal.on("click.tefs", (e) => {
+			if (!$(e.target).hasClass("text-editor-fullscreen-modal")) return;
+
+			if (this._is_fullscreen_locked) {
+				this._nudge_locked_modal();
+			} else {
 				this.exit_fullscreen();
 			}
 		});
-		
+
+		// ── Escape key ───────────────────────────────────────────────────────
+		// Exits when unlocked; nudges when locked.
 		$(document).on("keydown.fullscreen-editor", (e) => {
-			if (e.key === "Escape") this.exit_fullscreen();
+			if (e.key !== "Escape") return;
+
+			if (this._is_fullscreen_locked) {
+				this._nudge_locked_modal();
+			} else {
+				this.exit_fullscreen();
+			}
 		});
+	}
+
+	// Brief shake on the modal-dialog to signal exit is blocked while locked.
+	_nudge_locked_modal() {
+		if (!this.$fullscreen_modal) return;
+		const $dialog = this.$fullscreen_modal.find(".modal-dialog");
+		const $lock_btn = this.$fullscreen_modal.find(".btn-lock-toggle");
+
+		// Force-restart animations if already running
+		$dialog.removeClass("tefs-locked-nudge");
+		$lock_btn.removeClass("tefs-locked-highlight");
+		void $dialog[0].offsetWidth; // trigger reflow so browser resets animation
+		void $lock_btn[0].offsetWidth;
+
+		$dialog.addClass("tefs-locked-nudge");
+		$lock_btn.addClass("tefs-locked-highlight");
+
+		clearTimeout(this._nudge_timer);
+		this._nudge_timer = setTimeout(() => {
+			$dialog.removeClass("tefs-locked-nudge");
+			$lock_btn.removeClass("tefs-locked-highlight");
+		}, 400);
 	}
 
 	exit_fullscreen() {
 		this.is_fullscreen = false;
+		this._is_fullscreen_locked = false;
 
 		if (this.$toolbar?.length) {
 			this.$toolbar.find("button, select").prop("disabled", false);
