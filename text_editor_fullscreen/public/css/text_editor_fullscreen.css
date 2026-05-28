@@ -242,6 +242,7 @@
 	color: var(--text-color) !important;
 	resize: none;
 	flex: 1;
+	padding: 0 1.25rem;
 }
 
 .text-editor-fullscreen-modal .ql-editor.read-mode {
