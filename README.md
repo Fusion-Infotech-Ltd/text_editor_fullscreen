@@ -1,7 +1,10 @@
-## Text Editor Fullscreen v1.0.0
+## Text Editor Fullscreen v2.0.0
 
 ERPNext Version 16.x.x
-<img width="1872" height="960" alt="v16 modified text editor" src="https://github.com/user-attachments/assets/7c6758d4-b5f2-43fe-956f-81a721af74ce" />
+<img width="1372" height="898" alt="image" src="https://github.com/user-attachments/assets/b50cfa42-b3e9-4d2c-9ae7-dfb8ffeb6c6e" />
+<img width="1365" height="908" alt="image" src="https://github.com/user-attachments/assets/fa284165-423b-457c-b8f2-feecf5a52cf7" />
+<img width="202" height="85" alt="image" src="https://github.com/user-attachments/assets/ce93e261-17e5-4493-85a1-2bc09f6e1d16" />
+
 <img width="1026" height="430" alt="v16 text editor 1" src="https://github.com/user-attachments/assets/4211b85f-6ab9-4500-836a-5030f5de74eb" />
 <img width="1025" height="440" alt="v16 text editor 3" src="https://github.com/user-attachments/assets/3b47ed64-a522-4346-bea4-e1e03277c6a4" />
 <img width="1872" height="960" alt="Screenshot from 2026-05-19 10-46-52" src="https://github.com/user-attachments/assets/8ea448e3-c4cf-4384-9ff2-39f0dcc3a0e4" />
@@ -23,7 +26,9 @@ No configuration required. Install the app and every Text Editor field gets a fu
 ### Fullscreen editing
 - Expand/collapse button on the Quill toolbar (editable fields)
 - Moves the editor and toolbar into a focused modal for long-form writing
-- **Escape** or click outside to exit
+- **Escape** or click outside to exit (You can lock so that fullscreen does not close without pressing close button or minimize button introduced in v.2.0.0)
+- The lock feature will prevent accidental minimize
+- Lock state is saved in localstorage for the session
 - Toolbar icon switches between expand / collapse
 
 ### Read-only & display mode
