@@ -1,6 +1,14 @@
 ## Text Editor Fullscreen v2.0.0
 
-ERPNext Version 16.x.x
+First stable release of **Text Editor Fullscreen** — a lightweight Frappe app that adds a fullscreen mode to all **Text Editor** (Quill) fields on the desk.
+
+No configuration required. Install the app and every Text Editor field gets a fullscreen control automatically.
+
+---
+### ERPNext Version 16.x.x
+
+<img width="1538" height="916" alt="Recording 2026-05-28 162716" src="https://github.com/user-attachments/assets/c3bfdf26-d27b-45fc-8deb-ee66f3b94ec4" />
+
 <img width="1372" height="898" alt="image" src="https://github.com/user-attachments/assets/b50cfa42-b3e9-4d2c-9ae7-dfb8ffeb6c6e" />
 <img width="1365" height="908" alt="image" src="https://github.com/user-attachments/assets/fa284165-423b-457c-b8f2-feecf5a52cf7" />
 <img width="202" height="85" alt="image" src="https://github.com/user-attachments/assets/ce93e261-17e5-4493-85a1-2bc09f6e1d16" />
