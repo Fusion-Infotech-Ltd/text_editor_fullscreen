@@ -29,6 +29,16 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 		this.schedule_fullscreen_button_setup();
 	}
 
+	is_child_table_field() {
+		// Frappe's explicit flag (strict check to avoid truthy surprises)
+		if (this.in_grid === true) return true;
+
+		// DOM-based check: is this control physically inside a grid row?
+		if (this.$wrapper?.closest('.grid-body, .grid-row-open').length) return true;
+
+		return false;
+	}
+
 	set_disp_area(value) {
 		super.set_disp_area(value);
 		this.schedule_fullscreen_button_setup();
@@ -64,6 +74,8 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 	}
 
 	uses_disp_area() {
+		if (this.is_child_table_field()) return;
+		
 		const $disp_area = this.$wrapper.find(".control-value.like-disabled-input");
 		return $disp_area.length > 0 
             && !$disp_area.hasClass("hide") 
@@ -71,6 +83,8 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 	}
 
 	refresh_fullscreen_ui() {
+		if (this.is_child_table_field()) return;
+
 		if (this.is_fullscreen) return;
 
 		if (this.uses_disp_area()) {
@@ -86,6 +100,8 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 	}
 
 	add_fullscreen_button_to_disp_area() {
+		if (this.is_child_table_field()) return;
+
 		const $disp_area = this.$wrapper.find(".control-value.like-disabled-input");
 		if (!$disp_area.length) return;
 
@@ -144,6 +160,7 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 	}
 
 	add_editable_fullscreen_button() {
+		if (this.is_child_table_field()) return;
 		const $toolbar = this.$wrapper.find(".ql-toolbar");
 		if (!$toolbar.length) return;
 
@@ -169,6 +186,8 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 	}
 
 	add_fullscreen_button() {
+		if (this.is_child_table_field()) return;
+
 		if (this.uses_disp_area()) {
 			this.add_fullscreen_button_to_disp_area();
 			return;
@@ -275,6 +294,10 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 	}
 
 	show_fullscreen_readonly() {
+		if (this.df.parent && this.frm?.fields_dict[this.df.parent]?.grid) {
+			return;
+		}
+
 		if (!this.value) return;
 
 		this.$fullscreen_modal = $(`
@@ -324,7 +347,10 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 		});
 	}
 
-enter_fullscreen() {
+	enter_fullscreen() {
+		if (this.df.parent && this.frm?.fields_dict[this.df.parent]?.grid) {
+			return;
+		}
 		this.is_fullscreen = true;
 		// Restore lock preference from previous session
 		this._is_fullscreen_locked = localStorage.getItem("tefs_fullscreen_locked") === "1";
