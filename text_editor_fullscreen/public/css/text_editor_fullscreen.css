@@ -242,7 +242,7 @@
 	color: var(--text-color) !important;
 	resize: none;
 	flex: 1;
-	padding: 0 1.25rem;
+	padding: 1rem 1.25rem;
 }
 
 .text-editor-fullscreen-modal .ql-editor.read-mode {
@@ -378,4 +378,43 @@
 
 .btn-lock-toggle.tefs-locked-highlight svg {
     animation: tefs-lock-glow 0.4s ease;
+}
+
+@keyframes tefs-point-at-close {
+    0%, 100% { 
+        transform: translate(15px);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    25% {
+        transform: translate(18px);
+    }
+    50% {
+        transform: translate(15px);
+    }
+    75% {
+        transform: translate(18px);
+    }
+    90% {
+        opacity: 1;
+    }
+}
+
+.text-editor-fullscreen-modal .btn-close::after {
+    content: '👈';
+    position: absolute;
+    font-size: 20px;
+	font-weight: 200;
+    pointer-events: none;
+    opacity: 0;
+}
+
+.text-editor-fullscreen-modal .btn-close.tefs-locked-point {
+    position: relative;
+}
+
+.text-editor-fullscreen-modal .btn-close.tefs-locked-point::after {
+    animation: tefs-point-at-close 1.2s ease-in-out;
 }
