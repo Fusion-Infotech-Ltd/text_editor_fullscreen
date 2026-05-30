@@ -445,7 +445,7 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 			if (!$(e.target).hasClass("text-editor-fullscreen-modal")) return;
 
 			if (this._is_fullscreen_locked) {
-				this._nudge_locked_modal();
+				this.nudge_locked_modal();
 			} else {
 				this.exit_fullscreen();
 			}
@@ -457,7 +457,7 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 			if (e.key !== "Escape") return;
 
 			if (this._is_fullscreen_locked) {
-				this._nudge_locked_modal();
+				this.nudge_locked_modal();
 			} else {
 				this.exit_fullscreen();
 			}
@@ -465,24 +465,32 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 	}
 
 	// Brief shake on the modal-dialog to signal exit is blocked while locked.
-	_nudge_locked_modal() {
+	nudge_locked_modal() {
 		if (!this.$fullscreen_modal) return;
 		const $dialog = this.$fullscreen_modal.find(".modal-dialog");
 		const $lock_btn = this.$fullscreen_modal.find(".btn-lock-toggle");
+		const $close_btn = this.$fullscreen_modal.find(".btn-close");
 
 		// Force-restart animations if already running
 		$dialog.removeClass("tefs-locked-nudge");
 		$lock_btn.removeClass("tefs-locked-highlight");
-		void $dialog[0].offsetWidth; // trigger reflow so browser resets animation
-		void $lock_btn[0].offsetWidth;
+		$close_btn.removeClass("tefs-locked-point");
 
+		// trigger reflow so browser resets animation
+		void $dialog[0].offsetWidth; 
+		void $lock_btn[0].offsetWidth;
+		void $close_btn[0].offsetWidth;
+
+		// Add classes to trigger animations
 		$dialog.addClass("tefs-locked-nudge");
 		$lock_btn.addClass("tefs-locked-highlight");
+		$close_btn.addClass("tefs-locked-point");
 
 		clearTimeout(this._nudge_timer);
 		this._nudge_timer = setTimeout(() => {
 			$dialog.removeClass("tefs-locked-nudge");
 			$lock_btn.removeClass("tefs-locked-highlight");
+			$close_btn.removeClass("tefs-locked-point");
 		}, 400);
 	}
 
