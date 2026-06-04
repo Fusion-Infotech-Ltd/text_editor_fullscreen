@@ -30,10 +30,13 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 	}
 
 	is_child_table_field() {
+		// Circuit breaker: if it's physically inside a modal, explicitly return false
+		if (this.$wrapper?.closest('.modal, .form-in-grid').length) return false;
+
 		// Frappe's explicit flag (strict check to avoid truthy surprises)
 		if (this.in_grid === true) return true;
 
-		// DOM-based check: is this control physically inside a grid row?
+		// DOM-based check: is this control physically inside an inline grid row?
 		if (this.$wrapper?.closest('.grid-body, .grid-row-open').length) return true;
 
 		return false;
