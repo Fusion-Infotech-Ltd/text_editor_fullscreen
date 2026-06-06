@@ -4,6 +4,10 @@ First stable release of **Text Editor Fullscreen** — a lightweight Frappe app 
 
 No configuration required. Install the app and every Text Editor field gets a fullscreen control automatically.
 
+# Video Tutorial:
+
+[![Watch the video](https://img.youtube.com/vi/JAzG84p_XPo/0.jpg)](https://youtu.be/JAzG84p_XPo?si=cS0uihv7n1sH2hnI)
+
 ---
 ### ERPNext Version 16.x.x
 
