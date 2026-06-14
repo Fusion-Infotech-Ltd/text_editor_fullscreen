@@ -1,6 +1,8 @@
 .control-value.like-disabled-input.for-description {
 	position: relative;
 	min-height: 100px;
+	max-height: 300px;
+	overflow-y: auto;
 }
 
 .control-value.like-disabled-input.for-description .ql-fullscreen-readonly,
@@ -171,10 +173,25 @@
 	color: var(--text-color);
 	border-bottom: 1px solid var(--border-color);
 	padding: 0.5rem 1rem;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.5rem;
 }
 
 .text-editor-fullscreen-modal .modal-title {
 	color: var(--text-color);
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	margin: 0;
+}
+
+.text-editor-fullscreen-modal .btn-lock-toggle,
+.text-editor-fullscreen-modal .btn-close {
+	flex-shrink: 0;
 }
 
 .text-editor-fullscreen-modal .modal-body {
@@ -276,6 +293,7 @@
 	fill: var(--text-color) !important;
 }
 
+
 .text-editor-fullscreen-modal .ql-editor p,
 .text-editor-fullscreen-modal .ql-editor h1,
 .text-editor-fullscreen-modal .ql-editor h2,
@@ -285,10 +303,21 @@
 .text-editor-fullscreen-modal .ql-editor h6,
 .text-editor-fullscreen-modal .ql-editor ul,
 .text-editor-fullscreen-modal .ql-editor ol,
-.text-editor-fullscreen-modal .ql-editor li,
-.text-editor-fullscreen-modal .ql-editor span,
-.text-editor-fullscreen-modal .ql-editor div {
+.text-editor-fullscreen-modal .ql-editor li {
 	color: var(--text-color) !important;
+}
+
+[data-theme="dark"] .text-editor-fullscreen-modal .ql-editor p,
+[data-theme="dark"] .text-editor-fullscreen-modal .ql-editor h1,
+[data-theme="dark"] .text-editor-fullscreen-modal .ql-editor h2,
+[data-theme="dark"] .text-editor-fullscreen-modal .ql-editor h3,
+[data-theme="dark"] .text-editor-fullscreen-modal .ql-editor h4,
+[data-theme="dark"] .text-editor-fullscreen-modal .ql-editor h5,
+[data-theme="dark"] .text-editor-fullscreen-modal .ql-editor h6,
+[data-theme="dark"] .text-editor-fullscreen-modal .ql-editor ul,
+[data-theme="dark"] .text-editor-fullscreen-modal .ql-editor ol,
+[data-theme="dark"] .text-editor-fullscreen-modal .ql-editor li {
+	color: var(--gray-50) !important;
 }
 
 [data-theme="dark"] .control-value.like-disabled-input.for-description .ql-fullscreen-readonly,
@@ -417,4 +446,12 @@
 
 .text-editor-fullscreen-modal .btn-close.tefs-locked-point::after {
     animation: tefs-point-at-close 1.2s ease-in-out;
+}
+
+.ql-editor td {
+    border: 1px solid rgb(85, 85, 85) !important;	
+}
+
+[data-theme="dark"] .ql-editor td {
+	border: 1px solid rgb(201, 189, 189) !important;	
 }
