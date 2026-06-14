@@ -407,10 +407,7 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 				this.$toolbar.find("select").prop("disabled", true);
 			}
 
-			const $fs_btn = this.$toolbar.find(".ql-fullscreen");
-			if ($fs_btn.length) {
-				$fs_btn.find("use").attr("href", "#icon-collapse");
-			}
+			this.$toolbar.find(".ql-fullscreen").hide();
 		}
 
 		// ── Close button: always exits regardless of lock state ──────────────
@@ -514,7 +511,7 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 
 		const $fs_btn = this.$wrapper.find(".ql-fullscreen");
 		if ($fs_btn.length) {
-			$fs_btn.find("use").attr("href", "#icon-expand");
+			$fs_btn.show();
 		}
 
 		this.destroy_fullscreen_modal();
