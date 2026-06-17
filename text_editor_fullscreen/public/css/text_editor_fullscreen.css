@@ -204,6 +204,11 @@
 	padding: 0;
 }
 
+/* Keep image resize/delete controls visible above the editor in fullscreen */
+.text-editor-fullscreen-modal .ql-container {
+	position: relative;
+}
+
 .text-editor-fullscreen-modal--readonly .modal-body {
 	padding-top: 0;
 	padding-bottom: var(--padding-sm);
@@ -454,4 +459,44 @@
 
 [data-theme="dark"] .ql-editor td {
 	border: 1px solid rgb(201, 189, 189) !important;	
+}
+
+.tefs-image-delete {
+	position: absolute;
+	top: 4px;
+	right: 4px;
+	z-index: 3;
+	width: 24px;
+	height: 24px;
+	padding: 0;
+	border: 1px solid var(--border-color, #999);
+	border-radius: var(--border-radius-sm, 4px);
+	background: var(--fg-color, #fff);
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+}
+
+.tefs-image-delete .icon {
+	width: 14px;
+	height: 14px;
+	stroke: var(--red-500, #e53e3e);
+	fill: none;
+}
+
+.tefs-image-delete:hover {
+	background: var(--red-50, #fff5f5);
+	border-color: var(--red-400, #fc8181);
+}
+
+[data-theme="dark"] .tefs-image-delete {
+	background: var(--gray-800, #2d3748);
+	border-color: var(--gray-600, #4a5568);
+}
+
+[data-theme="dark"] .tefs-image-delete:hover {
+	background: var(--gray-700, #374151);
+	border-color: var(--red-400, #fc8181);
 }

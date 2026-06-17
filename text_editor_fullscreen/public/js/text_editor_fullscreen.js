@@ -18,6 +18,92 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 		this.is_fullscreen = false;
 	}
 
+	bind_events() {
+		super.bind_events();
+		this.patch_quill_image_delete();
+	}
+
+	patch_quill_image_delete() {
+		const image_resize = this.quill?.getModule("imageResize");
+		if (!image_resize || image_resize._tefs_delete_patched) return;
+
+		image_resize._tefs_delete_patched = true;
+
+		const original_show_overlay = image_resize.showOverlay.bind(image_resize);
+		image_resize.showOverlay = () => {
+			original_show_overlay();
+			this.add_image_delete_button(image_resize);
+		};
+
+		const original_check_image = image_resize.checkImage.bind(image_resize);
+		image_resize.checkImage = (evt) => {
+			if (!image_resize.img) return;
+
+			if (this.is_image_delete_key(evt)) {
+				evt.preventDefault();
+				evt.stopPropagation();
+				this.delete_selected_quill_image(image_resize);
+				return;
+			}
+
+			original_check_image(evt);
+		};
+
+		this._tefs_image_keydown = (evt) => {
+			if (!image_resize.img || !this.is_image_delete_key(evt)) return;
+			if (!this.quill?.root?.contains(image_resize.img)) return;
+
+			evt.preventDefault();
+			evt.stopPropagation();
+			this.delete_selected_quill_image(image_resize);
+		};
+		document.addEventListener("keydown", this._tefs_image_keydown, true);
+	}
+
+	is_image_delete_key(evt) {
+		return (
+			evt.key === "Delete" ||
+			evt.key === "Backspace" ||
+			evt.keyCode === 46 ||
+			evt.keyCode === 8
+		);
+	}
+
+	delete_selected_quill_image(image_resize) {
+		const img = image_resize?.img;
+		if (!img || !this.quill) return;
+
+		const Quill = this.quill.constructor;
+		const blot = Quill.find(img);
+		if (!blot) return;
+
+		const index = this.quill.getIndex(blot);
+		this.quill.deleteText(index, 1, "user");
+		image_resize.hide();
+	}
+
+	add_image_delete_button(image_resize) {
+		const overlay = image_resize?.overlay;
+		if (!overlay || overlay.querySelector(".tefs-image-delete")) return;
+
+		const $btn = $(`
+			<button type="button" class="tefs-image-delete" title="${__("Delete")}">
+				<svg class="icon icon-sm">
+					<use href="#icon-delete"></use>
+				</svg>
+			</button>
+		`);
+
+		$btn.on("mousedown", (e) => e.preventDefault());
+		$btn.on("click", (e) => {
+			e.preventDefault();
+			e.stopPropagation();
+			this.delete_selected_quill_image(image_resize);
+		});
+
+		overlay.appendChild($btn[0]);
+	}
+
 	make() {
 		super.make();
 		this.ensure_form_tab_listener();
