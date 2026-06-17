@@ -27,6 +27,8 @@ ERPNext Version 15.x.x
 <img width="1293" height="890" alt="v15 text editor 5" src="https://github.com/user-attachments/assets/4499beba-a214-41c7-a562-1ea9901d1ec6" />
 <img width="1138" height="396" alt="v15 text editor 6" src="https://github.com/user-attachments/assets/7c5c6a25-bc8b-490c-8b22-47bedcfd0c60" />
 <img width="448" height="430" alt="image" src="https://github.com/user-attachments/assets/358390f0-b009-4296-8b5d-9c036503c127" />
+<img width="779" height="461" alt="image" src="https://github.com/user-attachments/assets/53c802f3-271b-4f26-8682-b350c6f144dd" />
+
 
 
 
