@@ -20,10 +20,14 @@ No configuration required. Install the app and every Text Editor field gets a fu
 <img width="1026" height="430" alt="v16 text editor 1" src="https://github.com/user-attachments/assets/4211b85f-6ab9-4500-836a-5030f5de74eb" />
 <img width="1025" height="440" alt="v16 text editor 3" src="https://github.com/user-attachments/assets/3b47ed64-a522-4346-bea4-e1e03277c6a4" />
 <img width="1872" height="960" alt="Screenshot from 2026-05-19 10-46-52" src="https://github.com/user-attachments/assets/8ea448e3-c4cf-4384-9ff2-39f0dcc3a0e4" />
+<img width="448" height="430" alt="image" src="https://github.com/user-attachments/assets/68abbcbc-a5bc-406d-8d60-dcb3ec9f1261" />
+
 
 ERPNext Version 15.x.x
 <img width="1293" height="890" alt="v15 text editor 5" src="https://github.com/user-attachments/assets/4499beba-a214-41c7-a562-1ea9901d1ec6" />
 <img width="1138" height="396" alt="v15 text editor 6" src="https://github.com/user-attachments/assets/7c5c6a25-bc8b-490c-8b22-47bedcfd0c60" />
+<img width="448" height="430" alt="image" src="https://github.com/user-attachments/assets/358390f0-b009-4296-8b5d-9c036503c127" />
+
 
 
 
