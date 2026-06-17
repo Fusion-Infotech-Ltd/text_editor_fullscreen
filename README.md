@@ -73,4 +73,4 @@ No configuration required. Install the app and every Text Editor field gets a fu
 cd $PATH_TO_YOUR_BENCH
 bench get-app https://github.com/raisulislam0/text_editor_fullscreen
 bench install-app text_editor_fullscreen
-bench build --app text_editor_fullscreen
+bench --site [your_site_name] clear-cache
