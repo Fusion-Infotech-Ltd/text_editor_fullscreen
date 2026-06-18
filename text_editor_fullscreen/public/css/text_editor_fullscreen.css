@@ -562,11 +562,11 @@
 	background: var(--gray-900, #1a202c);
 }
 
-.tefs-crop-dialog {
+.tefs-crop-dialog--over-fullscreen {
 	z-index: 1070 !important;
 }
 
-.tefs-crop-dialog + .modal-backdrop,
+.tefs-crop-dialog--over-fullscreen + .modal-backdrop,
 .modal-backdrop.tefs-crop-backdrop {
 	z-index: 1060 !important;
 }

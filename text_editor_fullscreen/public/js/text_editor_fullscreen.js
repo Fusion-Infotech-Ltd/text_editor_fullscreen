@@ -156,10 +156,38 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 		);
 	}
 
-	ensure_crop_dialog_z_index(dialog) {
+	is_in_grid_form() {
+		return Boolean(this.$wrapper?.closest(".grid-row-open, .form-in-grid").length);
+	}
+
+	cleanup_crop_modal_backdrop($backdrop) {
+		($backdrop || $(".modal-backdrop.tefs-crop-modal-backdrop")).remove();
+	}
+
+	restore_body_modal_state() {
+		this.cleanup_crop_modal_backdrop();
+
+		if (!$(".modal.show").length) {
+			$(".modal-backdrop.show").not("#freeze").remove();
+			$("body").removeClass("modal-open");
+			if (!frappe.dom.freeze_count) {
+				$("body").css({ overflow: "", "padding-right": "" });
+			}
+		}
+	}
+
+	repair_grid_form_freeze() {
+		if (!frappe.dom.freeze_count || $("#freeze").length) return;
+		frappe.dom.freeze_count = 0;
+		frappe.dom.freeze("", "dark grid-form");
+	}
+
+	ensure_crop_dialog_z_index(dialog, $backdrop) {
+		if (!this.is_fullscreen) return;
+
 		const z_index = 1070;
 		dialog.$wrapper.css("z-index", z_index);
-		$(".modal-backdrop.show").last().addClass("tefs-crop-backdrop").css("z-index", z_index - 10);
+		$backdrop?.addClass("tefs-crop-backdrop").css("z-index", z_index - 10);
 	}
 
 	show_image_crop_dialog() {
@@ -168,12 +196,18 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 
 		let cropper_instance = null;
 		let crop_applied = false;
+		let crop_backdrop = null;
 
 		const dialog = new frappe.ui.Dialog({
 			title: __("Crop Image"),
 			size: "large",
+			keep_grid_form_open: this.is_in_grid_form(),
+			animate: false,
 		});
 		dialog.$wrapper.addClass("tefs-crop-dialog");
+		if (this.is_fullscreen) {
+			dialog.$wrapper.addClass("tefs-crop-dialog--over-fullscreen");
+		}
 
 		const $content = $(`
 			<div class="tefs-cropper-dialog">
@@ -244,8 +278,10 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 
 		dialog.set_secondary_action_label(__("Cancel"));
 
-		dialog.on_page_show = () => {
-			this.ensure_crop_dialog_z_index(dialog);
+		const setup_crop_dialog = () => {
+			crop_backdrop = $(".modal-backdrop.show").not("#freeze").last();
+			crop_backdrop.addClass("tefs-crop-modal-backdrop");
+			this.ensure_crop_dialog_z_index(dialog, crop_backdrop);
 			$crop_img.attr("src", img.src);
 			if ($crop_img[0].complete) {
 				init_cropper();
@@ -254,19 +290,31 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 			}
 		};
 
-		dialog.onhide = () => {
+		dialog.on_page_show = setup_crop_dialog;
+
+		const cleanup_crop_dialog = () => {
 			cropper_instance?.destroy();
 			cropper_instance = null;
-			this._tefs_crop_context = null;
 
 			if (!crop_applied && image_resize?.quill?.root?.contains(img)) {
 				image_resize.show(img);
 			}
+
+			dialog.$wrapper.remove();
+			this.cleanup_crop_modal_backdrop(crop_backdrop);
+			this.restore_body_modal_state();
+			this.repair_grid_form_freeze();
+			this._tefs_crop_context = null;
 		};
 
+		dialog.$wrapper.on("hidden.bs.modal.tefs-crop", () => {
+			dialog.$wrapper.off("hidden.bs.modal.tefs-crop");
+			cleanup_crop_dialog();
+		});
+
 		image_resize.hide();
+		dialog.$wrapper.appendTo("body");
 		dialog.show();
-		this.ensure_crop_dialog_z_index(dialog);
 	}
 
 	apply_image_crop(cropper_instance, dialog, original_img, on_success) {
