@@ -20,19 +20,20 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 
 	bind_events() {
 		super.bind_events();
-		this.patch_quill_image_delete();
+		this.patch_quill_image_tools();
 	}
 
-	patch_quill_image_delete() {
+	patch_quill_image_tools() {
 		const image_resize = this.quill?.getModule("imageResize");
-		if (!image_resize || image_resize._tefs_delete_patched) return;
+		if (!image_resize || image_resize._tefs_image_tools_patched) return;
 
-		image_resize._tefs_delete_patched = true;
+		image_resize._tefs_image_tools_patched = true;
 
 		const original_show_overlay = image_resize.showOverlay.bind(image_resize);
 		image_resize.showOverlay = () => {
 			original_show_overlay();
 			this.add_image_delete_button(image_resize);
+			this.add_image_crop_button(image_resize);
 		};
 
 		const original_check_image = image_resize.checkImage.bind(image_resize);
@@ -102,6 +103,255 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 		});
 
 		overlay.appendChild($btn[0]);
+	}
+
+	can_edit_quill_images() {
+		return !this.df.read_only && this.quill?.isEnabled();
+	}
+
+	add_image_crop_button(image_resize) {
+		if (!this.can_edit_quill_images()) return;
+
+		const overlay = image_resize?.overlay;
+		if (!overlay || overlay.querySelector(".tefs-image-crop")) return;
+
+		const $btn = $(`
+			<button type="button" class="tefs-image-crop" title="${__("Crop")}">
+				<svg class="icon icon-sm">
+					<use href="#icon-crop"></use>
+				</svg>
+			</button>
+		`);
+
+		$btn.on("mousedown", (e) => e.preventDefault());
+		$btn.on("click", (e) => {
+			e.preventDefault();
+			e.stopPropagation();
+			this.open_image_crop_dialog(image_resize);
+		});
+
+		overlay.appendChild($btn[0]);
+	}
+
+	open_image_crop_dialog(image_resize) {
+		const img = image_resize?.img;
+		if (!img?.src || !this.can_edit_quill_images()) return;
+
+		this._tefs_crop_context = { image_resize, img };
+
+		frappe.require(
+			[
+				"/assets/text_editor_fullscreen/vendor/cropper.min.js",
+				"/assets/text_editor_fullscreen/vendor/cropper.min.css",
+			],
+			() => {
+				if (typeof Cropper === "undefined") {
+					frappe.msgprint(
+						__("Could not load image cropper. Please refresh the page and try again.")
+					);
+					return;
+				}
+				this.show_image_crop_dialog();
+			}
+		);
+	}
+
+	ensure_crop_dialog_z_index(dialog) {
+		const z_index = 1070;
+		dialog.$wrapper.css("z-index", z_index);
+		$(".modal-backdrop.show").last().addClass("tefs-crop-backdrop").css("z-index", z_index - 10);
+	}
+
+	show_image_crop_dialog() {
+		const { image_resize, img } = this._tefs_crop_context || {};
+		if (!img?.src) return;
+
+		let cropper_instance = null;
+		let crop_applied = false;
+
+		const dialog = new frappe.ui.Dialog({
+			title: __("Crop Image"),
+			size: "large",
+		});
+		dialog.$wrapper.addClass("tefs-crop-dialog");
+
+		const $content = $(`
+			<div class="tefs-cropper-dialog">
+				<div class="tefs-cropper-aspect-ratios btn-group margin-bottom">
+					<button type="button" class="btn btn-default btn-sm active" data-ratio="free">${__(
+						"Free",
+						null,
+						"Image Cropper"
+					)}</button>
+					<button type="button" class="btn btn-default btn-sm" data-ratio="1">${__(
+						"1:1",
+						null,
+						"Image Cropper"
+					)}</button>
+					<button type="button" class="btn btn-default btn-sm" data-ratio="1.333">${__(
+						"4:3",
+						null,
+						"Image Cropper"
+					)}</button>
+					<button type="button" class="btn btn-default btn-sm" data-ratio="1.778">${__(
+						"16:9",
+						null,
+						"Image Cropper"
+					)}</button>
+				</div>
+				<div class="tefs-cropper-wrapper">
+					<img class="tefs-cropper-image" alt="" />
+				</div>
+			</div>
+		`);
+
+		dialog.$body.append($content);
+
+		const $crop_img = $content.find(".tefs-cropper-image");
+
+		const init_cropper = () => {
+			if (cropper_instance || !dialog.$wrapper.is(":visible")) return;
+			cropper_instance = new Cropper($crop_img[0], {
+				zoomable: false,
+				scalable: false,
+				viewMode: 1,
+				aspectRatio: NaN,
+				checkCrossOrigin: false,
+			});
+		};
+
+		$crop_img.on("error", () => {
+			frappe.msgprint(
+				__(
+					"Unable to load image for cropping. The image may be from an external source that does not allow editing."
+				)
+			);
+			dialog.hide();
+		});
+
+		$content.find("[data-ratio]").on("click", function () {
+			$content.find("[data-ratio]").removeClass("active");
+			$(this).addClass("active");
+			const ratio = $(this).data("ratio");
+			cropper_instance?.setAspectRatio(ratio === "free" ? NaN : parseFloat(ratio));
+		});
+
+		dialog.set_primary_action(__("Crop"), () => {
+			this.apply_image_crop(cropper_instance, dialog, img, () => {
+				crop_applied = true;
+			});
+		});
+
+		dialog.set_secondary_action_label(__("Cancel"));
+
+		dialog.on_page_show = () => {
+			this.ensure_crop_dialog_z_index(dialog);
+			$crop_img.attr("src", img.src);
+			if ($crop_img[0].complete) {
+				init_cropper();
+			} else {
+				$crop_img.one("load", init_cropper);
+			}
+		};
+
+		dialog.onhide = () => {
+			cropper_instance?.destroy();
+			cropper_instance = null;
+			this._tefs_crop_context = null;
+
+			if (!crop_applied && image_resize?.quill?.root?.contains(img)) {
+				image_resize.show(img);
+			}
+		};
+
+		image_resize.hide();
+		dialog.show();
+		this.ensure_crop_dialog_z_index(dialog);
+	}
+
+	apply_image_crop(cropper_instance, dialog, original_img, on_success) {
+		if (!cropper_instance) return;
+
+		const canvas = cropper_instance.getCroppedCanvas();
+		if (!canvas) {
+			frappe.msgprint(__("Could not crop image."));
+			return;
+		}
+
+		const $primary_btn = dialog.get_primary_btn();
+		$primary_btn.prop("disabled", true);
+
+		canvas.toBlob((blob) => {
+			if (!blob) {
+				frappe.msgprint(__("Could not crop image."));
+				$primary_btn.prop("disabled", false);
+				return;
+			}
+
+			const file_name = this.get_cropped_file_name(original_img.src);
+			this.upload_cropped_image(blob, file_name)
+				.then((file_doc) => {
+					this.replace_quill_image(original_img, file_doc.file_url);
+					on_success?.();
+					cropper_instance.destroy();
+					dialog.hide();
+				})
+				.catch(() => {
+					frappe.msgprint(__("Failed to upload cropped image."));
+					$primary_btn.prop("disabled", false);
+				});
+		}, "image/png");
+	}
+
+	get_cropped_file_name(src) {
+		const base = src.split("/").pop()?.split("?")[0] || "image";
+		const name = base.replace(/\.[^.]+$/, "");
+		return `${name}-cropped.png`;
+	}
+
+	replace_quill_image(img, file_url) {
+		img.src = file_url;
+		img.removeAttribute("width");
+		img.removeAttribute("height");
+		if (img.style) {
+			img.style.width = "";
+			img.style.height = "";
+		}
+
+		this.parse_validate_and_set_in_model(this.get_input_value());
+	}
+
+	upload_cropped_image(blob, file_name) {
+		return new Promise((resolve, reject) => {
+			const xhr = new XMLHttpRequest();
+			xhr.open("POST", "/api/method/upload_file", true);
+			xhr.setRequestHeader("Accept", "application/json");
+			xhr.setRequestHeader("X-Frappe-CSRF-Token", frappe.csrf_token);
+
+			const form_data = new FormData();
+			form_data.append("file", blob, file_name);
+			form_data.append("is_private", 0);
+			form_data.append("folder", "Home/Attachments");
+
+			if (this.frm?.doctype && this.frm?.docname && !this.frm.is_new()) {
+				form_data.append("doctype", this.frm.doctype);
+				form_data.append("docname", this.frm.docname);
+			}
+
+			xhr.onreadystatechange = () => {
+				if (xhr.readyState !== XMLHttpRequest.DONE) return;
+				if (xhr.status === 200) {
+					try {
+						resolve(JSON.parse(xhr.responseText).message);
+					} catch (e) {
+						reject(e);
+					}
+				} else {
+					reject(new Error(xhr.responseText || "Upload failed"));
+				}
+			};
+			xhr.send(form_data);
+		});
 	}
 
 	make() {
