@@ -500,3 +500,73 @@
 	background: var(--gray-700, #374151);
 	border-color: var(--red-400, #fc8181);
 }
+
+.tefs-image-crop {
+	position: absolute;
+	top: 4px;
+	left: 4px;
+	z-index: 3;
+	width: 24px;
+	height: 24px;
+	padding: 0;
+	border: 1px solid var(--border-color, #999);
+	border-radius: var(--border-radius-sm, 4px);
+	background: var(--fg-color, #fff);
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+}
+
+.tefs-image-crop .icon {
+	width: 14px;
+	height: 14px;
+	stroke: var(--text-color, #333);
+	fill: none;
+}
+
+.tefs-image-crop:hover {
+	background: var(--gray-100, #f7fafc);
+	border-color: var(--border-color, #999);
+}
+
+[data-theme="dark"] .tefs-image-crop {
+	background: var(--gray-800, #2d3748);
+	border-color: var(--gray-600, #4a5568);
+}
+
+[data-theme="dark"] .tefs-image-crop:hover {
+	background: var(--gray-700, #374151);
+}
+
+.tefs-cropper-dialog .tefs-cropper-wrapper {
+	max-height: 60vh;
+	overflow: hidden;
+	background: var(--gray-100, #f7fafc);
+}
+
+.tefs-cropper-dialog .tefs-cropper-image {
+	display: block;
+	max-width: 100%;
+	max-height: 60vh;
+}
+
+.tefs-cropper-dialog .tefs-cropper-aspect-ratios {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0;
+}
+
+[data-theme="dark"] .tefs-cropper-dialog .tefs-cropper-wrapper {
+	background: var(--gray-900, #1a202c);
+}
+
+.tefs-crop-dialog--over-fullscreen {
+	z-index: 1070 !important;
+}
+
+.tefs-crop-dialog--over-fullscreen + .modal-backdrop,
+.modal-backdrop.tefs-crop-backdrop {
+	z-index: 1060 !important;
+}
