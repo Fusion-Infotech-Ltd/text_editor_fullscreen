@@ -378,7 +378,7 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 
 			const form_data = new FormData();
 			form_data.append("file", blob, file_name);
-			form_data.append("is_private", 0);
+			form_data.append("is_private", 1);
 			form_data.append("folder", "Home/Attachments");
 
 			if (this.frm?.doctype && this.frm?.docname && !this.frm.is_new()) {
