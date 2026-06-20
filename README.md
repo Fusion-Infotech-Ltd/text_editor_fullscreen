@@ -17,6 +17,8 @@ No configuration required. Install the app and every Text Editor field gets a fu
 <img width="1365" height="908" alt="image" src="https://github.com/user-attachments/assets/fa284165-423b-457c-b8f2-feecf5a52cf7" />
 <img width="202" height="85" alt="image" src="https://github.com/user-attachments/assets/ce93e261-17e5-4493-85a1-2bc09f6e1d16" />
 <img width="779" height="461" alt="image" src="https://github.com/user-attachments/assets/5c876fb6-4c62-4fd9-8d13-317d93404fb2" />
+<img width="1402" height="903" alt="Screenshot 2026-06-19 120409" src="https://github.com/user-attachments/assets/e903aee1-70e8-4e92-bdc8-ec7813fe2cba" />
+
 
 <img width="1026" height="430" alt="v16 text editor 1" src="https://github.com/user-attachments/assets/4211b85f-6ab9-4500-836a-5030f5de74eb" />
 <img width="1025" height="440" alt="v16 text editor 3" src="https://github.com/user-attachments/assets/3b47ed64-a522-4346-bea4-e1e03277c6a4" />
