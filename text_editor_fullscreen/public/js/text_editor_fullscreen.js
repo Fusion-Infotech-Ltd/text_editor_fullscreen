@@ -1,6 +1,6 @@
 // Author: Raisul Islam (raisul.aust1@gmail.com)
 // Date May 2026
-// Description: Adds fullscreen capability to Text Editor fields in Frappe/ERPNext.
+// Description: Adds fullscreen capability to Text Editor and Code fields in Frappe/ERPNext.
 
 frappe.provide("frappe.ui.form.ControlTextEditor");
 
@@ -454,7 +454,7 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 		if (!this.frm?.$wrapper) return;
 
 		this.frm.$wrapper
-			.find('.tab-pane.active .frappe-control[data-fieldtype="Text Editor"]')
+			.find('.tab-pane.active .frappe-control:is([data-fieldtype="Text Editor"], [data-fieldtype="Code"])')
 			.each((_, el) => {
 				el.fieldobj?.schedule_fullscreen_button_setup?.();
 			});
@@ -904,6 +904,304 @@ frappe.ui.form.ControlTextEditor = class CustomTextEditor extends OriginalTextEd
 		this.$toolbar = null;
 		this.original_parent = null;
 		this.original_height = null;
+
+		this.schedule_fullscreen_button_setup();
+	}
+};
+
+// Code fields use Ace (ControlCode), not Quill — extend separately without a toolbar.
+frappe.provide("frappe.ui.form.ControlCode");
+
+const OriginalControlCode = frappe.ui.form.ControlCode;
+
+frappe.ui.form.ControlCode = class CustomControlCode extends OriginalControlCode {
+	is_code_field() {
+		return this.df.fieldtype === "Code";
+	}
+
+	make() {
+		super.make();
+		if (!this.is_code_field()) return;
+		this.ensure_form_tab_listener();
+		this.schedule_fullscreen_button_setup();
+	}
+
+	make_ace_editor() {
+		super.make_ace_editor();
+		if (!this.is_code_field()) return;
+		this.is_fullscreen = false;
+		this.schedule_fullscreen_button_setup();
+	}
+
+	refresh() {
+		super.refresh();
+		if (!this.is_code_field()) return;
+		this.schedule_fullscreen_button_setup();
+	}
+
+	set_formatted_input(value) {
+		const result = super.set_formatted_input(value);
+		if (!this.is_code_field()) return result;
+		Promise.resolve(result).then(() => this.schedule_fullscreen_button_setup());
+		return result;
+	}
+
+	is_child_table_field() {
+		if (this.$wrapper?.closest(".modal, .form-in-grid").length) return false;
+		if (this.in_grid === true) return true;
+		if (this.$wrapper?.closest(".grid-body, .grid-row-open").length) return true;
+		return false;
+	}
+
+	schedule_fullscreen_button_setup() {
+		if (!this.is_code_field()) return;
+		clearTimeout(this._tefs_btn_timer);
+		this._tefs_btn_timer = setTimeout(() => this.refresh_fullscreen_ui(), 100);
+	}
+
+	ensure_form_tab_listener() {
+		if (!this.frm || this.frm._tefs_tab_listener_bound) return;
+		this.frm._tefs_tab_listener_bound = true;
+
+		this.frm.$wrapper.on("shown.bs.tab.tefs", '[data-toggle="tab"]', () => {
+			setTimeout(() => this.refresh_visible_tab_editors(), 50);
+		});
+	}
+
+	refresh_visible_tab_editors() {
+		if (!this.frm?.$wrapper) return;
+
+		this.frm.$wrapper
+			.find('.tab-pane.active .frappe-control:is([data-fieldtype="Text Editor"], [data-fieldtype="Code"])')
+			.each((_, el) => {
+				el.fieldobj?.schedule_fullscreen_button_setup?.();
+			});
+	}
+
+	refresh_fullscreen_ui() {
+		if (!this.is_code_field() || this.is_child_table_field() || this.is_fullscreen) return;
+		if (this.editor && this.ace_editor_target) {
+			this.add_fullscreen_button();
+		}
+	}
+
+	add_fullscreen_button() {
+		if (!this.is_code_field() || this.is_child_table_field()) return;
+
+		const $target = this.ace_editor_target;
+		if (!$target?.length) return;
+
+		$target.off(".tefs");
+		$target.find(".tefs-code-fullscreen").remove();
+
+		const $fullscreen_btn = $(`
+			<button class="tefs-code-fullscreen" type="button" title="${__("Fullscreen")}">
+				<svg class="icon icon-sm">
+					<use href="#icon-expand"></use>
+				</svg>
+			</button>
+		`);
+
+		$fullscreen_btn.on("click", (e) => {
+			e.preventDefault();
+			e.stopPropagation();
+			this.toggle_fullscreen();
+		});
+
+		$target.css("position", "relative").append($fullscreen_btn);
+
+		let mouseMoveTimeout = null;
+		const showButton = () => $fullscreen_btn.addClass("visible");
+		const hideButton = () => $fullscreen_btn.removeClass("visible");
+
+		$target.on("mousemove.tefs", () => {
+			if (mouseMoveTimeout) clearTimeout(mouseMoveTimeout);
+			showButton();
+			mouseMoveTimeout = setTimeout(hideButton, 2000);
+		});
+
+		$target.on("mouseenter.tefs", showButton);
+		$target.on("mouseleave.tefs", () => {
+			if (mouseMoveTimeout) clearTimeout(mouseMoveTimeout);
+			hideButton();
+		});
+
+		$fullscreen_btn.on("mouseenter.tefs", () => {
+			if (mouseMoveTimeout) clearTimeout(mouseMoveTimeout);
+			showButton();
+		});
+	}
+
+	toggle_fullscreen() {
+		if (this.is_fullscreen) {
+			this.exit_fullscreen();
+		} else {
+			this.enter_fullscreen();
+		}
+	}
+
+	is_app_full_width() {
+		return document.body.classList.contains("full-width");
+	}
+
+	apply_fullscreen_modal_width($modal) {
+		$modal.toggleClass("tefs-app-full-width", this.is_app_full_width());
+	}
+
+	bind_fullscreen_width_toggle($modal) {
+		$(document.body).on("toggleFullWidth.tefs-fullscreen-code", () => {
+			this.apply_fullscreen_modal_width($modal);
+		});
+	}
+
+	unbind_fullscreen_width_toggle() {
+		$(document.body).off("toggleFullWidth.tefs-fullscreen-code");
+	}
+
+	destroy_fullscreen_modal() {
+		this.unbind_fullscreen_width_toggle();
+		this.$fullscreen_modal?.remove();
+		this.$fullscreen_modal = null;
+	}
+
+	enter_fullscreen() {
+		if (!this.is_code_field()) return;
+		if (this.df.parent && this.frm?.fields_dict[this.df.parent]?.grid) return;
+		if (!this.editor || !this.ace_editor_target?.length) return;
+
+		this.is_fullscreen = true;
+		this._is_fullscreen_locked = localStorage.getItem("tefs_fullscreen_locked") === "1";
+
+		this.original_parent = this.ace_editor_target.parent();
+		this.original_height = this.ace_editor_target.css("height");
+		this.original_max_height = this.ace_editor_target.css("max-height");
+
+		this.$fullscreen_modal = $(`
+			<div class="modal fade show text-editor-fullscreen-modal text-editor-fullscreen-modal--code" style="display: block;">
+				<div class="modal-dialog modal-lg">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title">${this.df.label || __("Code")}</h5>
+							<button type="button" class="btn-lock-toggle" title="${__("Lock (prevent accidental close)")}" style="background: transparent; border: none;">
+								<svg class="icon icon-sm">
+									<use href="#icon-unlock"></use>
+								</svg>
+							</button>
+							<button type="button" class="btn-close">
+								<svg class="icon icon-sm">
+									<use href="#icon-close"></use>
+								</svg>
+							</button>
+						</div>
+						<div class="modal-body"></div>
+					</div>
+				</div>
+			</div>
+		`).appendTo(document.body);
+
+		this.apply_fullscreen_modal_width(this.$fullscreen_modal);
+		this.bind_fullscreen_width_toggle(this.$fullscreen_modal);
+
+		const $modal_body = this.$fullscreen_modal.find(".modal-body");
+		$modal_body.append(this.ace_editor_target);
+		this.ace_editor_target.find(".tefs-code-fullscreen").hide();
+		this.ace_editor_target.css({
+			height: "calc(100vh - 200px)",
+			maxHeight: "none",
+		});
+		this.editor.resize();
+
+		this.$fullscreen_modal.find(".btn-close").on("click.tefs", () => this.exit_fullscreen());
+
+		const $lock_btn = this.$fullscreen_modal.find(".btn-lock-toggle");
+		if (this._is_fullscreen_locked) {
+			$lock_btn.find("use").attr("href", "#icon-lock");
+			$lock_btn.attr("title", __("Unlock (allow close on outside click / Escape)"));
+			this.$fullscreen_modal.addClass("tefs-locked");
+		}
+
+		$lock_btn.on("click.tefs", () => {
+			this._is_fullscreen_locked = !this._is_fullscreen_locked;
+
+			if (this._is_fullscreen_locked) {
+				$lock_btn.find("use").attr("href", "#icon-lock");
+				$lock_btn.attr("title", __("Unlock (allow close on outside click / Escape)"));
+				this.$fullscreen_modal.addClass("tefs-locked");
+				localStorage.setItem("tefs_fullscreen_locked", "1");
+			} else {
+				$lock_btn.find("use").attr("href", "#icon-unlock");
+				$lock_btn.attr("title", __("Lock (prevent accidental close)"));
+				this.$fullscreen_modal.removeClass("tefs-locked");
+				localStorage.setItem("tefs_fullscreen_locked", "0");
+			}
+		});
+
+		this.$fullscreen_modal.on("click.tefs", (e) => {
+			if (!$(e.target).hasClass("text-editor-fullscreen-modal")) return;
+
+			if (this._is_fullscreen_locked) {
+				this.nudge_locked_modal();
+			} else {
+				this.exit_fullscreen();
+			}
+		});
+
+		$(document).on("keydown.fullscreen-code", (e) => {
+			if (e.key !== "Escape") return;
+
+			if (this._is_fullscreen_locked) {
+				this.nudge_locked_modal();
+			} else {
+				this.exit_fullscreen();
+			}
+		});
+	}
+
+	nudge_locked_modal() {
+		if (!this.$fullscreen_modal) return;
+		const $dialog = this.$fullscreen_modal.find(".modal-dialog");
+		const $lock_btn = this.$fullscreen_modal.find(".btn-lock-toggle");
+		const $close_btn = this.$fullscreen_modal.find(".btn-close");
+
+		$dialog.removeClass("tefs-locked-nudge");
+		$lock_btn.removeClass("tefs-locked-highlight");
+		$close_btn.removeClass("tefs-locked-point");
+
+		void $dialog[0].offsetWidth;
+		void $lock_btn[0].offsetWidth;
+		void $close_btn[0].offsetWidth;
+
+		$dialog.addClass("tefs-locked-nudge");
+		$lock_btn.addClass("tefs-locked-highlight");
+		$close_btn.addClass("tefs-locked-point");
+
+		clearTimeout(this._nudge_timer);
+		this._nudge_timer = setTimeout(() => {
+			$dialog.removeClass("tefs-locked-nudge");
+			$lock_btn.removeClass("tefs-locked-highlight");
+			$close_btn.removeClass("tefs-locked-point");
+		}, 400);
+	}
+
+	exit_fullscreen() {
+		if (!this.is_code_field()) return;
+
+		this.is_fullscreen = false;
+		this._is_fullscreen_locked = false;
+
+		this.original_parent?.append(this.ace_editor_target);
+		this.ace_editor_target.css({
+			height: this.original_height || "300px",
+			maxHeight: this.original_max_height || "",
+		});
+		this.editor?.resize();
+
+		this.destroy_fullscreen_modal();
+		$(document).off("keydown.fullscreen-code");
+
+		this.original_parent = null;
+		this.original_height = null;
+		this.original_max_height = null;
 
 		this.schedule_fullscreen_button_setup();
 	}
