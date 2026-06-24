@@ -52,6 +52,63 @@
 	transition: transform 0.25s ease;
 }
 
+.ace-editor-target .tefs-code-fullscreen {
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	width: 36px;
+	height: 36px;
+	padding: 0;
+	border: none;
+	background: var(--fg-color);
+	cursor: pointer;
+	z-index: 10;
+	border-radius: var(--border-radius-md);
+	box-shadow: var(--shadow-md);
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 0.2s ease, visibility 0.2s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.ace-editor-target .tefs-code-fullscreen .icon {
+	width: 18px;
+	height: 18px;
+	stroke: var(--icon-stroke);
+	fill: none;
+}
+
+.ace-editor-target .tefs-code-fullscreen.visible {
+	opacity: 1;
+	visibility: visible;
+}
+
+.ace-editor-target .tefs-code-fullscreen:hover {
+	background: var(--fg-color);
+}
+
+.ace-editor-target .tefs-code-fullscreen:hover .icon {
+	transform: scale(1.25);
+	transition: transform 0.25s ease;
+}
+
+.text-editor-fullscreen-modal--code .modal-body {
+	padding: 0;
+}
+
+.text-editor-fullscreen-modal--code .ace-editor-target {
+	flex: 1;
+	width: 100%;
+	border: none !important;
+	border-radius: 0 !important;
+}
+
+.text-editor-fullscreen-modal--code .tefs-code-fullscreen {
+	display: none !important;
+}
+
 /* Pin fullscreen to the first toolbar row (v16 adds extra row height via .ql-formats margin) */
 .ql-toolbar.ql-snow.tefs-has-fullscreen,
 .ql-toolbar.ql-snow:has(> .ql-fullscreen),
