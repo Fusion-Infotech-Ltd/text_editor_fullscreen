@@ -1,6 +1,6 @@
 ## Text Editor Fullscreen v3.0.0
 
-First stable release of **Text Editor Fullscreen** — a lightweight Frappe app that adds a fullscreen mode to all **Text Editor** (Quill) fields on the desk.
+First stable release of **Text Editor Fullscreen** — a lightweight Frappe app that adds a fullscreen mode to all **Text Editor** (Quill) and **Code** (Ace) fields on the desk.
 
 No configuration required. Install the app and every Text Editor field gets a fullscreen control automatically.
 
